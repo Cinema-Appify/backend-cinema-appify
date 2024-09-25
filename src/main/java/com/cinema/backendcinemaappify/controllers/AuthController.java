@@ -5,13 +5,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.cinema.backendcinemaappify.models.Cinema;
 import com.cinema.backendcinemaappify.models.Role;
 import com.cinema.backendcinemaappify.models.SystemRole;
 import com.cinema.backendcinemaappify.models.User;
 import com.cinema.backendcinemaappify.payload.request.LoginRequest;
+import com.cinema.backendcinemaappify.payload.request.SignUpCinemaRequest;
 import com.cinema.backendcinemaappify.payload.request.SignupRequest;
 import com.cinema.backendcinemaappify.payload.response.JwtResponse;
 import com.cinema.backendcinemaappify.payload.response.MessageResponse;
+import com.cinema.backendcinemaappify.repository.CinemaRepository;
 import com.cinema.backendcinemaappify.repository.RoleRepository;
 import com.cinema.backendcinemaappify.repository.UserRepository;
 import com.cinema.backendcinemaappify.security.jwt.JwtUtils;
@@ -40,6 +43,9 @@ public class AuthController {
 
     @Autowired
     UserRepository userRepository; // Repository for user-related database operations
+
+    @Autowired
+    CinemaRepository cinemaRepository; // Repository for cinema
 
     @Autowired
     RoleRepository roleRepository; // Repository for role-related database operations
@@ -149,5 +155,26 @@ public class AuthController {
 
         // Return a success message upon successful registration
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+
+    @PostMapping("/signUpCinema")
+    public ResponseEntity<?> RegisterCinema(@Valid @RequestBody SignUpCinemaRequest cinemaRequest) {
+        if (cinemaRepository.existsByCorreo(cinemaRequest.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Email is already in use!"));
+        }
+
+        Cinema cinema = new Cinema(
+                cinemaRequest.getEmail(),
+                cinemaRequest.getCinemaName(),
+//                cinemaRequest.getPhoto(),
+                encoder.encode(cinemaRequest.getPassword())
+        );
+
+        cinemaRepository.save(cinema);
+
+        return ResponseEntity.ok(new MessageResponse("Cinema registered successfully!"));
+
     }
 }
