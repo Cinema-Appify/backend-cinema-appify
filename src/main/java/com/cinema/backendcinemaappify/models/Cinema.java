@@ -16,8 +16,8 @@ public class Cinema {
     @Size(max = 50)
     private String nombre;
 
-    //@NotBlank
-    //private String foto;
+    @NotBlank
+    private String foto;
 
     @NotBlank
     @Size(max = 50)
@@ -58,13 +58,13 @@ public class Cinema {
         this.nombre = nombre;
     }
 
-//    public String getFoto() {
-//        return foto;
-//    }
-//
-//    public void setFoto(String foto) {
-//        this.foto = foto;
-//    }
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
+    }
 
     public String getCorreo() {
         return correo;

@@ -1,7 +1,9 @@
 package com.cinema.backendcinemaappify.controllers;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,9 +20,11 @@ import com.cinema.backendcinemaappify.repository.CinemaRepository;
 import com.cinema.backendcinemaappify.repository.RoleRepository;
 import com.cinema.backendcinemaappify.repository.UserRepository;
 import com.cinema.backendcinemaappify.security.jwt.JwtUtils;
+import com.cinema.backendcinemaappify.security.services.CloudinaryServiceImpl;
 import com.cinema.backendcinemaappify.security.services.UserDetailsImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -40,6 +44,9 @@ public class AuthController {
 
     @Autowired
     AuthenticationManager authenticationManager; // Handles user authentication
+
+    @Autowired
+    CloudinaryServiceImpl cloudinaryService;
 
     @Autowired
     UserRepository userRepository; // Repository for user-related database operations
@@ -67,7 +74,7 @@ public class AuthController {
 
         // Authenticate the user with the provided username and password
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(),
                         loginRequest.getPassword()));
 
         // Set the authentication in the security context
@@ -87,7 +94,6 @@ public class AuthController {
         // Return a response containing the JWT and user details
         return ResponseEntity.ok(new JwtResponse(jwt,
                 userDetails.getId(),
-                userDetails.getUsername(),
                 userDetails.getEmail(),
                 roles));
     }
@@ -101,13 +107,6 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
 
-        // Check if the username is already taken
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
-        }
-
         // Check if the email is already in use
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
             return ResponseEntity
@@ -116,8 +115,11 @@ public class AuthController {
         }
 
         // Create a new user's account
-        User user = new User(signUpRequest.getUsername(),
+        User user = new User(
                 signUpRequest.getEmail(),
+                signUpRequest.getName(),
+                signUpRequest.getFirstName(),
+                signUpRequest.getLastName(),
                 encoder.encode(signUpRequest.getPassword())); // Encode the password
 
         Set<String> strRoles = signUpRequest.getRoles(); // Get the roles from the request
@@ -158,23 +160,33 @@ public class AuthController {
     }
 
     @PostMapping("/signUpCinema")
-    public ResponseEntity<?> RegisterCinema(@Valid @RequestBody SignUpCinemaRequest cinemaRequest) {
+    public ResponseEntity<?> registerCinema(@Valid @RequestBody SignUpCinemaRequest cinemaRequest) {
         if (cinemaRepository.existsByCorreo(cinemaRequest.getEmail())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Email is already in use!"));
         }
 
-        Cinema cinema = new Cinema(
-                cinemaRequest.getEmail(),
-                cinemaRequest.getCinemaName(),
-//                cinemaRequest.getPhoto(),
-                encoder.encode(cinemaRequest.getPassword())
-        );
+        Cinema cinema = new Cinema();
+        cinema.setCorreo(cinemaRequest.getEmail());
+        cinema.setNombre(cinemaRequest.getCinemaName());
+        cinema.setContrasenia(encoder.encode(cinemaRequest.getPassword()));
+
+        // Handle photo upload
+        if (cinemaRequest.getPhoto() != null && !cinemaRequest.getPhoto().isEmpty()) {
+            try {
+                Map uploadResult = cloudinaryService.uploadImage(cinemaRequest.getPhoto().getInputStream());
+                cinema.setFoto(uploadResult.get("url").toString());
+            } catch (IOException e) {
+                return ResponseEntity
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(new MessageResponse("Error uploading photo: " + e.getMessage()));
+            }
+        }
 
         cinemaRepository.save(cinema);
 
         return ResponseEntity.ok(new MessageResponse("Cinema registered successfully!"));
-
     }
+
 }
