@@ -18,7 +18,6 @@ public class UserDetailsImpl implements UserDetails {
     private static final long serialVersionUID = 1L; // Serializable version identifier
 
     private String id; // Unique identifier for the user
-    private String username; // Username of the user
     private String email; // Email address of the user
 
     @JsonIgnore // Prevent serialization of the password field
@@ -30,15 +29,13 @@ public class UserDetailsImpl implements UserDetails {
      * Constructor to initialize UserDetailsImpl.
      *
      * @param id           The unique identifier of the user.
-     * @param username     The username of the user.
      * @param email        The email of the user.
      * @param password     The password of the user.
      * @param authorities  The collection of user's authorities.
      */
-    public UserDetailsImpl(String id, String username, String email, String password,
+    public UserDetailsImpl(String id, String email, String password,
                            Collection<? extends GrantedAuthority> authorities) {
         this.id = id; // Set user ID
-        this.username = username; // Set username
         this.email = email; // Set email
         this.password = password; // Set password
         this.authorities = authorities; // Set authorities
@@ -59,7 +56,6 @@ public class UserDetailsImpl implements UserDetails {
         // Return a new UserDetailsImpl object
         return new UserDetailsImpl(
                 user.getId(), // User ID
-                user.getUsername(), // Username
                 user.getEmail(), // Email
                 user.getPassword(), // Password
                 authorities); // User authorities
@@ -85,7 +81,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username; // Return username
+        return email; // Return username
     }
 
     @Override

@@ -11,21 +11,16 @@ import java.util.Optional;
  */
 public interface UserRepository extends MongoRepository<User, String> {
 
-    /**
-     * Find a User by their username.
-     *
-     * @param username The username of the user.
-     * @return An Optional containing the User if found, or empty if not found.
-     */
-    Optional<User> findByUsername(String username);
+
 
     /**
      * Check if a username already exists in the database.
      *
-     * @param username The username to check.
+     * @param email The username to check.
      * @return A Boolean indicating whether the username exists (true) or not (false).
      */
-    Boolean existsByUsername(String username);
+    Optional<User> findByEmail(String email);
+
 
     /**
      * Check if an email already exists in the database.

@@ -20,7 +20,7 @@ public class SignUpCinemaRequest {
     @Size(min = 6, max = 40)
     private String password;
 
-    private MultipartFile photo;
+    private String photoUrl;
 
     public String getEmail() {
         return email;
@@ -46,11 +46,11 @@ public class SignUpCinemaRequest {
         this.password = password;
     }
 
-    public MultipartFile getPhoto() {
-        return photo;
+    public String getPhotoUrl() {
+        return photoUrl;
     }
 
-    public void setPhoto(MultipartFile photo) {
-        this.photo = photo;
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 }

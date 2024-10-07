@@ -31,11 +31,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @CrossOrigin(origins = "*", maxAge = 3600) // Allow cross-origin requests for all origins
 @RestController // Indicate that this class is a REST controller
@@ -173,20 +170,30 @@ public class AuthController {
         cinema.setContrasenia(encoder.encode(cinemaRequest.getPassword()));
 
         // Handle photo upload
-        if (cinemaRequest.getPhoto() != null && !cinemaRequest.getPhoto().isEmpty()) {
-            try {
-                Map uploadResult = cloudinaryService.uploadImage(cinemaRequest.getPhoto().getInputStream());
-                cinema.setFoto(uploadResult.get("url").toString());
-            } catch (IOException e) {
-                return ResponseEntity
-                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(new MessageResponse("Error uploading photo: " + e.getMessage()));
-            }
+        if (cinemaRequest.getPhotoUrl() != null && !cinemaRequest.getPhotoUrl().isEmpty()) {
+            cinema.setFoto(cinemaRequest.getPhotoUrl());
         }
 
         cinemaRepository.save(cinema);
 
         return ResponseEntity.ok(new MessageResponse("Cinema registered successfully!"));
     }
+
+
+@PostMapping("/uploadImage")
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
+
+    try {
+        // Llama a la lógica de servicio para cargar la imagen
+        Map<String, String> uploadResult = cloudinaryService.uploadImage(file.getInputStream());
+
+        // Retorna la URL de la imagen subida
+        return ResponseEntity.ok(uploadResult);
+    } catch (IOException e) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new MessageResponse("Error uploading image: " + e.getMessage()));
+    }
+}
 
 }
