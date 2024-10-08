@@ -10,10 +10,10 @@ public interface CinemaRepository extends MongoRepository<Cinema, String> {
     /**
      * Check if a cinema's email already exists in the database.
      *
-     * @param correo The cinema's email to check.
+     * @param email The cinema's email to check.
      * @return A Boolean indicating whether the email exists (true) or not (false).
      */
-    Boolean existsByCorreo(String correo);
+    Boolean existsByEmail(String email);
 
     Optional<Cinema> findByCorreo(String correo);
 }

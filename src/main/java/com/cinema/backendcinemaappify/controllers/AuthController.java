@@ -158,22 +158,35 @@ public class AuthController {
 
     @PostMapping("/signUpCinema")
     public ResponseEntity<?> registerCinema(@Valid @RequestBody SignUpCinemaRequest cinemaRequest) {
-        if (cinemaRepository.existsByCorreo(cinemaRequest.getEmail())) {
+        if (cinemaRepository.existsByEmail(cinemaRequest.getEmail())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Email is already in use!"));
         }
 
-        Cinema cinema = new Cinema();
-        cinema.setCorreo(cinemaRequest.getEmail());
-        cinema.setNombre(cinemaRequest.getCinemaName());
-        cinema.setContrasenia(encoder.encode(cinemaRequest.getPassword()));
+        Cinema cinema = new Cinema(
+                cinemaRequest.getEmail(),
+                cinemaRequest.getName(),
+                encoder.encode(cinemaRequest.getPassword())
+        );
+
+        Set<String> strRoles = cinemaRequest.getRoles(); // Get the roles from the request
+        Set<Role> roles = new HashSet<>(); // Initialize a set to hold the user roles
+
+        // Assign roles based on the request or default to user role
+        if (strRoles == null) {
+            Role userRole = roleRepository.findByName(SystemRole.ROLE_CINEMA)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            roles.add(userRole);
+        }
 
         // Handle photo upload
         if (cinemaRequest.getPhotoUrl() != null && !cinemaRequest.getPhotoUrl().isEmpty()) {
-            cinema.setFoto(cinemaRequest.getPhotoUrl());
+            cinema.setPhoto(cinemaRequest.getPhotoUrl());
         }
 
+        // Assign roles to the user and save it to the database
+        cinema.setRoles(roles);
         cinemaRepository.save(cinema);
 
         return ResponseEntity.ok(new MessageResponse("Cinema registered successfully!"));

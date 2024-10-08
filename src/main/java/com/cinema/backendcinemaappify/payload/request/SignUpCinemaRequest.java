@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Set;
+
 public class SignUpCinemaRequest {
 
     @NotBlank
@@ -14,11 +16,13 @@ public class SignUpCinemaRequest {
 
     @NotBlank
     @Size(min = 3, max = 20)
-    private String cinemaName;
+    private String name;
 
     @NotBlank
     @Size(min = 6, max = 40)
     private String password;
+
+    private Set<String> roles;
 
     private String photoUrl;
 
@@ -30,12 +34,12 @@ public class SignUpCinemaRequest {
         this.email = email;
     }
 
-    public String getCinemaName() {
-        return cinemaName;
+    public String getName() {
+        return name;
     }
 
-    public void setCinemaName(String cinemaName) {
-        this.cinemaName = cinemaName;
+    public void setName(String cinemaName) {
+        this.name = cinemaName;
     }
 
     public String getPassword() {
@@ -52,5 +56,13 @@ public class SignUpCinemaRequest {
 
     public void setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
+    }
+
+    public Set<String> getRoles() {
+        return this.roles;
+    }
+
+    public void setRole(Set<String> roles) {
+        this.roles = roles;
     }
 }

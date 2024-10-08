@@ -4,7 +4,11 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Document(collection = "cinema")
 public class Cinema {
@@ -14,31 +18,34 @@ public class Cinema {
 
     @NotBlank
     @Size(max = 50)
-    private String nombre;
+    private String name;
 
     @NotBlank
-    private String foto;
+    private String photo;
 
     @NotBlank
     @Size(max = 50)
     @Email
-    private String correo;
+    private String email;
 
     @NotBlank
     @Size(max = 120)
-    private String contrasenia;
+    private String password;
 
-    private String estado = "pending";
+    private String state = "pending";
+
+    @DBRef
+    private Set<Role> roles = new HashSet<>();
 
     public Cinema() {
     }
 
-    public Cinema(String nombre, String correo, String contrasenia) {
-        this.nombre = nombre;
-        //this.foto = foto;
-        this.correo = correo;
-        this.contrasenia = contrasenia;
-        this.estado = "pending";
+    public Cinema(String name, String email, String password) {
+        this.name = name;
+        //this.photo = photo;
+        this.email = email;
+        this.password = password;
+        this.state = "pending";
     }
 
 
@@ -51,42 +58,50 @@ public class Cinema {
     }
 
     public String getNombre() {
-        return nombre;
+        return name;
     }
 
     public void setNombre(String nombre) {
-        this.nombre = nombre;
+        this.name = nombre;
     }
 
-    public String getFoto() {
-        return foto;
+    public String getPhoto() {
+        return photo;
     }
 
-    public void setFoto(String foto) {
-        this.foto = foto;
+    public void setPhoto(String foto) {
+        this.photo = foto;
     }
 
     public String getCorreo() {
-        return correo;
+        return email;
     }
 
     public void setCorreo(String correo) {
-        this.correo = correo;
+        this.email = correo;
     }
 
     public String getContrasenia() {
-        return contrasenia;
+        return password;
     }
 
     public void setContrasenia(String contrasenia) {
-        this.contrasenia = contrasenia;
+        this.password = contrasenia;
     }
 
     public String getEstado() {
-        return estado;
+        return state;
     }
 
     public void setEstado(String estado) {
-        this.estado = estado;
+        this.state = estado;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 }
