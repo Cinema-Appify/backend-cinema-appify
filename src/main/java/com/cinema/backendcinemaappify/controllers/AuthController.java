@@ -167,6 +167,7 @@ public class AuthController {
                     .body(new MessageResponse("Error: Email is already in use!"));
         }
 
+
         Cinema cinema = new Cinema(
                 cinemaRequest.getName(),
                 cinemaRequest.getEmail(),
@@ -197,8 +198,5 @@ public class AuthController {
 
         return ResponseEntity.ok(new MessageResponse("Cinema registered successfully!"));
     }
-
-
-
-
+    
 }
