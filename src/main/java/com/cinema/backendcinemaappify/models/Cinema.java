@@ -21,12 +21,12 @@ public class Cinema {
     private String name;
 
     @NotBlank
-    private String photo;
-
-    @NotBlank
     @Size(max = 50)
     @Email
     private String email;
+
+    @NotBlank
+    private String photo;
 
     @NotBlank
     @Size(max = 120)
@@ -42,59 +42,50 @@ public class Cinema {
 
     public Cinema(String name, String email, String password) {
         this.name = name;
-        //this.photo = photo;
         this.email = email;
         this.password = password;
         this.state = "pending";
     }
 
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getNombre() {
+    public String getName() {
         return name;
     }
 
-    public void setNombre(String nombre) {
-        this.name = nombre;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPhoto() {
         return photo;
     }
 
-    public void setPhoto(String foto) {
-        this.photo = foto;
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 
-    public String getCorreo() {
+    public String getEmail() {
         return email;
     }
 
-    public void setCorreo(String correo) {
-        this.email = correo;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public String getContrasenia() {
+    public String getPassword() {
         return password;
     }
 
-    public void setContrasenia(String contrasenia) {
-        this.password = contrasenia;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public String getEstado() {
+    public String getState() {
         return state;
     }
 
-    public void setEstado(String estado) {
-        this.state = estado;
+    public void setState(String state) {
+        this.state = state;
     }
 
     public Set<Role> getRoles() {
@@ -103,5 +94,18 @@ public class Cinema {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    @Override
+    public String toString() {
+        return "Cinema{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", photoUrl='" + photo + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", state='" + state + '\'' +
+                ", roles=" + roles +
+                '}';
     }
 }

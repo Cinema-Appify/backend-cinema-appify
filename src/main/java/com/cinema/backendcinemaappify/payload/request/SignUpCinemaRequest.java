@@ -3,11 +3,15 @@ package com.cinema.backendcinemaappify.payload.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Set;
 
 public class SignUpCinemaRequest {
+
+
+    @NotBlank
+    @Size(min = 3, max = 20)
+    private String name;
 
     @NotBlank
     @Size(max = 50)
@@ -15,16 +19,12 @@ public class SignUpCinemaRequest {
     private String email;
 
     @NotBlank
-    @Size(min = 3, max = 20)
-    private String name;
-
-    @NotBlank
     @Size(min = 6, max = 40)
     private String password;
 
     private Set<String> roles;
 
-    private String photoUrl;
+    private String photo;
 
     public String getEmail() {
         return email;
@@ -50,12 +50,12 @@ public class SignUpCinemaRequest {
         this.password = password;
     }
 
-    public String getPhotoUrl() {
-        return photoUrl;
+    public String getPhoto() {
+        return photo;
     }
 
-    public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 
     public Set<String> getRoles() {
@@ -64,5 +64,16 @@ public class SignUpCinemaRequest {
 
     public void setRole(Set<String> roles) {
         this.roles = roles;
+    }
+
+    @Override
+    public String toString() {
+        return "SignUpCinemaRequest{" +
+                "email='" + email + '\'' +
+                ", name='" + name + '\'' +
+                ", password='" + password + '\'' +
+                ", roles=" + roles +
+                ", photoUrl='" + photo + '\'' +
+                '}';
     }
 }

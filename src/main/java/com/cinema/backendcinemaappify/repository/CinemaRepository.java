@@ -3,7 +3,6 @@ package com.cinema.backendcinemaappify.repository;
 import com.cinema.backendcinemaappify.models.Cinema;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import java.util.Optional;
 
 public interface CinemaRepository extends MongoRepository<Cinema, String> {
 
@@ -15,5 +14,6 @@ public interface CinemaRepository extends MongoRepository<Cinema, String> {
      */
     Boolean existsByEmail(String email);
 
-    Optional<Cinema> findByCorreo(String correo);
+
+
 }

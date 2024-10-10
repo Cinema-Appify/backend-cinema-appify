@@ -156,8 +156,11 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
+
     @PostMapping("/signUpCinema")
     public ResponseEntity<?> registerCinema(@Valid @RequestBody SignUpCinemaRequest cinemaRequest) {
+        System.out.println("URL de la foto recibida: " + cinemaRequest.getPhoto());
+
         if (cinemaRepository.existsByEmail(cinemaRequest.getEmail())) {
             return ResponseEntity
                     .badRequest()
@@ -165,48 +168,37 @@ public class AuthController {
         }
 
         Cinema cinema = new Cinema(
-                cinemaRequest.getEmail(),
                 cinemaRequest.getName(),
+                cinemaRequest.getEmail(),
                 encoder.encode(cinemaRequest.getPassword())
         );
 
-        Set<String> strRoles = cinemaRequest.getRoles(); // Get the roles from the request
-        Set<Role> roles = new HashSet<>(); // Initialize a set to hold the user roles
+        Set<String> strRoles = cinemaRequest.getRoles(); // Obtener los roles de la solicitud
+        Set<Role> roles = new HashSet<>(); // Inicializar un conjunto para almacenar los roles
 
-        // Assign roles based on the request or default to user role
+        // Asignar roles según la solicitud o por defecto al rol de cine
         if (strRoles == null) {
             Role userRole = roleRepository.findByName(SystemRole.ROLE_CINEMA)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             roles.add(userRole);
         }
 
-        // Handle photo upload
-        if (cinemaRequest.getPhotoUrl() != null && !cinemaRequest.getPhotoUrl().isEmpty()) {
-            cinema.setPhoto(cinemaRequest.getPhotoUrl());
+        // Manejar la URL de la foto
+        if (cinemaRequest.getPhoto() != null && !cinemaRequest.getPhoto().isEmpty()) {
+            cinema.setPhoto(cinemaRequest.getPhoto());
+        } else {
+            System.out.println("No se proporcionó una URL de foto válida.");
         }
 
-        // Assign roles to the user and save it to the database
+        // Asignar roles al cine y guardarlo en la base de datos
         cinema.setRoles(roles);
+        System.out.println(cinema);
         cinemaRepository.save(cinema);
 
         return ResponseEntity.ok(new MessageResponse("Cinema registered successfully!"));
     }
 
 
-@PostMapping("/uploadImage")
-    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
 
-    try {
-        // Llama a la lógica de servicio para cargar la imagen
-        Map<String, String> uploadResult = cloudinaryService.uploadImage(file.getInputStream());
-
-        // Retorna la URL de la imagen subida
-        return ResponseEntity.ok(uploadResult);
-    } catch (IOException e) {
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new MessageResponse("Error uploading image: " + e.getMessage()));
-    }
-}
 
 }
