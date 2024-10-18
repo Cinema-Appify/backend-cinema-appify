@@ -32,6 +32,7 @@ public class Cinema {
     @Size(max = 120)
     private String password;
 
+    @NotBlank
     private String state = "pending";
 
     @DBRef

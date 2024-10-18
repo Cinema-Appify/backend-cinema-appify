@@ -13,7 +13,4 @@ public interface CinemaRepository extends MongoRepository<Cinema, String> {
      * @return A Boolean indicating whether the email exists (true) or not (false).
      */
     Boolean existsByEmail(String email);
-
-
-
 }

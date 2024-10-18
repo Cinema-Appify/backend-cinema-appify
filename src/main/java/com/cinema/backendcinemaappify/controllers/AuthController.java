@@ -1,9 +1,7 @@
 package com.cinema.backendcinemaappify.controllers;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,11 +18,9 @@ import com.cinema.backendcinemaappify.repository.CinemaRepository;
 import com.cinema.backendcinemaappify.repository.RoleRepository;
 import com.cinema.backendcinemaappify.repository.UserRepository;
 import com.cinema.backendcinemaappify.security.jwt.JwtUtils;
-import com.cinema.backendcinemaappify.security.services.CloudinaryServiceImpl;
 import com.cinema.backendcinemaappify.security.services.UserDetailsImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,7 +28,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @CrossOrigin(origins = "*", maxAge = 3600) // Allow cross-origin requests for all origins
 @RestController // Indicate that this class is a REST controller
@@ -41,9 +36,6 @@ public class AuthController {
 
     @Autowired
     AuthenticationManager authenticationManager; // Handles user authentication
-
-    @Autowired
-    CloudinaryServiceImpl cloudinaryService;
 
     @Autowired
     UserRepository userRepository; // Repository for user-related database operations
@@ -198,5 +190,17 @@ public class AuthController {
 
         return ResponseEntity.ok(new MessageResponse("Cinema registered successfully!"));
     }
-    
+
+    @GetMapping("/getCinemas")
+    public ResponseEntity<?> getAllCinema() {
+        List<Cinema> cinemas = cinemaRepository.findAll();
+        return ResponseEntity.ok(cinemas);
+    }
+
+    @GetMapping("/getUsers")
+    public ResponseEntity<?> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return ResponseEntity.ok(users);
+    }
+
 }
