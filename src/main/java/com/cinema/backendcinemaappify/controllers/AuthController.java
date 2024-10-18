@@ -5,13 +5,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.cinema.backendcinemaappify.models.Cinema;
 import com.cinema.backendcinemaappify.models.Role;
 import com.cinema.backendcinemaappify.models.SystemRole;
 import com.cinema.backendcinemaappify.models.User;
 import com.cinema.backendcinemaappify.payload.request.LoginRequest;
+import com.cinema.backendcinemaappify.payload.request.SignUpCinemaRequest;
 import com.cinema.backendcinemaappify.payload.request.SignupRequest;
 import com.cinema.backendcinemaappify.payload.response.JwtResponse;
 import com.cinema.backendcinemaappify.payload.response.MessageResponse;
+import com.cinema.backendcinemaappify.repository.CinemaRepository;
 import com.cinema.backendcinemaappify.repository.RoleRepository;
 import com.cinema.backendcinemaappify.repository.UserRepository;
 import com.cinema.backendcinemaappify.security.jwt.JwtUtils;
@@ -24,11 +27,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600) // Allow cross-origin requests for all origins
 @RestController // Indicate that this class is a REST controller
@@ -40,6 +39,9 @@ public class AuthController {
 
     @Autowired
     UserRepository userRepository; // Repository for user-related database operations
+
+    @Autowired
+    CinemaRepository cinemaRepository; // Repository for cinema
 
     @Autowired
     RoleRepository roleRepository; // Repository for role-related database operations
@@ -61,7 +63,7 @@ public class AuthController {
 
         // Authenticate the user with the provided username and password
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(),
                         loginRequest.getPassword()));
 
         // Set the authentication in the security context
@@ -81,7 +83,6 @@ public class AuthController {
         // Return a response containing the JWT and user details
         return ResponseEntity.ok(new JwtResponse(jwt,
                 userDetails.getId(),
-                userDetails.getUsername(),
                 userDetails.getEmail(),
                 roles));
     }
@@ -95,13 +96,6 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
 
-        // Check if the username is already taken
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
-        }
-
         // Check if the email is already in use
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
             return ResponseEntity
@@ -110,8 +104,11 @@ public class AuthController {
         }
 
         // Create a new user's account
-        User user = new User(signUpRequest.getUsername(),
+        User user = new User(
                 signUpRequest.getEmail(),
+                signUpRequest.getName(),
+                signUpRequest.getFirstName(),
+                signUpRequest.getLastName(),
                 encoder.encode(signUpRequest.getPassword())); // Encode the password
 
         Set<String> strRoles = signUpRequest.getRoles(); // Get the roles from the request
@@ -150,4 +147,60 @@ public class AuthController {
         // Return a success message upon successful registration
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
+
+
+    @PostMapping("/signUpCinema")
+    public ResponseEntity<?> registerCinema(@Valid @RequestBody SignUpCinemaRequest cinemaRequest) {
+        System.out.println("URL de la foto recibida: " + cinemaRequest.getPhoto());
+
+        if (cinemaRepository.existsByEmail(cinemaRequest.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Email is already in use!"));
+        }
+
+
+        Cinema cinema = new Cinema(
+                cinemaRequest.getName(),
+                cinemaRequest.getEmail(),
+                encoder.encode(cinemaRequest.getPassword())
+        );
+
+        Set<String> strRoles = cinemaRequest.getRoles(); // Obtener los roles de la solicitud
+        Set<Role> roles = new HashSet<>(); // Inicializar un conjunto para almacenar los roles
+
+        // Asignar roles según la solicitud o por defecto al rol de cine
+        if (strRoles == null) {
+            Role userRole = roleRepository.findByName(SystemRole.ROLE_CINEMA)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            roles.add(userRole);
+        }
+
+        // Manejar la URL de la foto
+        if (cinemaRequest.getPhoto() != null && !cinemaRequest.getPhoto().isEmpty()) {
+            cinema.setPhoto(cinemaRequest.getPhoto());
+        } else {
+            System.out.println("No se proporcionó una URL de foto válida.");
+        }
+
+        // Asignar roles al cine y guardarlo en la base de datos
+        cinema.setRoles(roles);
+        System.out.println(cinema);
+        cinemaRepository.save(cinema);
+
+        return ResponseEntity.ok(new MessageResponse("Cinema registered successfully!"));
+    }
+
+    @GetMapping("/getCinemas")
+    public ResponseEntity<?> getAllCinema() {
+        List<Cinema> cinemas = cinemaRepository.findAll();
+        return ResponseEntity.ok(cinemas);
+    }
+
+    @GetMapping("/getUsers")
+    public ResponseEntity<?> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return ResponseEntity.ok(users);
+    }
+
 }

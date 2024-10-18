@@ -3,3 +3,8 @@ spring:
     mongodb:
       uri: mongodb+srv://admin:r3nsSy8188VZRhnQ@cinemacluster.fjoc8.mongodb.net/?retryWrites=true&w=majority&appName=CinemaCluster
       database: cinema
+
+#cloudinary:
+#  cloud-name: duhypoi5d
+#  api-key: 599989977423184
+#  api-secret: 6DPY-3WF3NNy4R1IDu7fcZRL2UM

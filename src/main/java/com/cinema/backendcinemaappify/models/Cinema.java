@@ -10,11 +10,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.HashSet;
 import java.util.Set;
 
-@Document(collection = "user")
-public class User {
+@Document(collection = "cinema")
+public class Cinema {
+
     @Id
     private String id;
 
+    @NotBlank
+    @Size(max = 50)
+    private String name;
 
     @NotBlank
     @Size(max = 50)
@@ -22,42 +26,28 @@ public class User {
     private String email;
 
     @NotBlank
-    @Size(max = 50)
-    private  String name;
-
-    @NotBlank
-    @Size(max = 50)
-    private String firstName;
-
-    @NotBlank
-    @Size(max = 50)
-    private String lastName;
+    private String photo;
 
     @NotBlank
     @Size(max = 120)
     private String password;
 
+    @NotBlank
+    private String state = "pending";
+
     @DBRef
     private Set<Role> roles = new HashSet<>();
 
-    public User() {
+    public Cinema() {
     }
 
-    public User(String email, String name, String firstName, String lastName, String password) {
-        this.email = email;
+    public Cinema(String name, String email, String password) {
         this.name = name;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.email = email;
         this.password = password;
+        this.state = "pending";
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -67,20 +57,12 @@ public class User {
         this.name = name;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getPhoto() {
+        return photo;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 
     public String getEmail() {
@@ -99,11 +81,32 @@ public class User {
         this.password = password;
     }
 
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
     public Set<Role> getRoles() {
         return roles;
     }
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    @Override
+    public String toString() {
+        return "Cinema{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", photoUrl='" + photo + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", state='" + state + '\'' +
+                ", roles=" + roles +
+                '}';
     }
 }
