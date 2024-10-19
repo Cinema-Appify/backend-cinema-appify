@@ -1,27 +1,24 @@
 package com.cinema.backendcinemaappify.security.services;
 
-import java.util.Collection; // Import Collection for holding authorities
-import java.util.List; // Import List for storing roles
-import java.util.Objects; // Import Objects for object comparison
-import java.util.stream.Collectors; // Import Collectors for stream operations
-
+import com.cinema.backendcinemaappify.models.Cinema;
 import com.cinema.backendcinemaappify.models.User;
-import org.springframework.security.core.GrantedAuthority; // Import GrantedAuthority for user authorities
-import org.springframework.security.core.authority.SimpleGrantedAuthority; // Import SimpleGrantedAuthority for role representation
-import org.springframework.security.core.userdetails.UserDetails; // Import UserDetails for Spring Security
-import com.fasterxml.jackson.annotation.JsonIgnore; // Import JsonIgnore to prevent serialization of sensitive data
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-/**
- * Implementation of Spring Security's UserDetails interface for representing user details.
- */
-public class UserDetailsImpl implements UserDetails {
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+public class CinemaDetailsImpl implements UserDetails {
     private static final long serialVersionUID = 1L; // Serializable version identifier
 
     private String id; // Unique identifier for the user
     private String name;
-    private String firstName;
-    private String lastName;
     private String email; // Email address of the user
+    private String state;
 
     @JsonIgnore // Prevent serialization of the password field
     private String password; // Password of the user
@@ -35,12 +32,11 @@ public class UserDetailsImpl implements UserDetails {
      * @param password     The password of the user.
      * @param authorities  The collection of user's authorities.
      */
-    public UserDetailsImpl(String id,  String name, String firstName, String lastName, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+    public CinemaDetailsImpl(String id, String name, String email, String state, String password, Collection<? extends GrantedAuthority> authorities) {
         this.id = id; // Set user ID
         this.name = name;
-        this.firstName = firstName;
-        this.lastName = lastName;
         this.email = email; // Set email
+        this.state = state;
         this.password = password; // Set password
         this.authorities = authorities; // Set authorities
     }
@@ -48,23 +44,22 @@ public class UserDetailsImpl implements UserDetails {
     /**
      * Builds a UserDetailsImpl instance from a User object.
      *
-     * @param user The User object.
+     * @param cinema The User object.
      * @return A UserDetailsImpl instance.
      */
-    public static UserDetailsImpl build(User user) {
+    public static CinemaDetailsImpl build(Cinema cinema) {
         // Map the roles of the user to GrantedAuthority
-        List<GrantedAuthority> authorities = user.getRoles().stream()
+        List<GrantedAuthority> authorities = cinema.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName().name())) // Convert each role to SimpleGrantedAuthority
                 .collect(Collectors.toList()); // Collect into a list
 
         // Return a new UserDetailsImpl object
-        return new UserDetailsImpl(
-                user.getId(), // User ID
-                user.getName(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getEmail(), // Email
-                user.getPassword(), // Password
+        return new CinemaDetailsImpl(
+                cinema.getId(), // User ID
+                cinema.getName(),
+                cinema.getEmail(), // Email
+                cinema.getState(),
+                cinema.getPassword(), // Password
                 authorities); // User authorities
     }
 
@@ -79,9 +74,10 @@ public class UserDetailsImpl implements UserDetails {
     public String getEmail() {
         return email; // Return email
     }
+
     public String getName() { return name; }
-    public String getFirstName() { return firstName; }
-    public String getLastName() { return lastName; }
+
+    public String getState() { return state; }
 
     @Override
     public String getPassword() {
@@ -119,8 +115,7 @@ public class UserDetailsImpl implements UserDetails {
             return true;
         if (o == null || getClass() != o.getClass()) // Check if the object is null or not of the same class
             return false;
-        UserDetailsImpl user = (UserDetailsImpl) o; // Cast to UserDetailsImpl
-        return Objects.equals(id, user.id); // Check if IDs are equal
+        CinemaDetailsImpl cinema = (CinemaDetailsImpl) o; // Cast to UserDetailsImpl
+        return Objects.equals(id, cinema.id); // Check if IDs are equal
     }
 }
-
