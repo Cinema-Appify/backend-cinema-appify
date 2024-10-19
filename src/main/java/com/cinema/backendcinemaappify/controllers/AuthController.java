@@ -18,6 +18,7 @@ import com.cinema.backendcinemaappify.repository.CinemaRepository;
 import com.cinema.backendcinemaappify.repository.RoleRepository;
 import com.cinema.backendcinemaappify.repository.UserRepository;
 import com.cinema.backendcinemaappify.security.jwt.JwtUtils;
+import com.cinema.backendcinemaappify.security.services.CinemaDetailsImpl;
 import com.cinema.backendcinemaappify.security.services.UserDetailsImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,19 +73,40 @@ public class AuthController {
         // Generate JWT token based on the authentication
         String jwt = jwtUtils.generateJwtToken(authentication);
 
-        // Get user details from the authentication object
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        if(userRepository.findByEmail(loginRequest.getEmail()).isPresent()) {
+            // Get user details from the authentication object
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        // Extract user roles into a list
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
+            // Extract user roles into a list
+            List<String> roles = userDetails.getAuthorities().stream()
+                    .map(item -> item.getAuthority())
+                    .collect(Collectors.toList());
 
-        // Return a response containing the JWT and user details
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getEmail(),
-                roles));
+            // Return a response containing the JWT and user details
+            return ResponseEntity.ok(new JwtResponse(jwt,
+                    userDetails.getId(),
+                    userDetails.getName(),
+                    userDetails.getFirstName(),
+                    userDetails.getLastName(),
+                    userDetails.getEmail(),
+                    roles));
+        } else {
+            // Get user details from the authentication object
+            CinemaDetailsImpl cinemaDetails = (CinemaDetailsImpl) authentication.getPrincipal();
+
+            // Extract user roles into a list
+            List<String> roles = cinemaDetails.getAuthorities().stream()
+                    .map(item -> item.getAuthority())
+                    .collect(Collectors.toList());
+
+            // Return a response containing the JWT and user details
+            return ResponseEntity.ok(new JwtResponse(jwt,
+                    cinemaDetails.getId(),
+                    cinemaDetails.getName(),
+                    cinemaDetails.getEmail(),
+                    cinemaDetails.getState(),
+                    roles));
+        }
     }
 
     /**
