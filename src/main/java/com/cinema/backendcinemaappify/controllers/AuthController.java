@@ -2,21 +2,15 @@ package com.cinema.backendcinemaappify.controllers;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.cinema.backendcinemaappify.models.Cinema;
-import com.cinema.backendcinemaappify.models.Role;
-import com.cinema.backendcinemaappify.models.SystemRole;
-import com.cinema.backendcinemaappify.models.User;
-import com.cinema.backendcinemaappify.payload.request.LoginRequest;
-import com.cinema.backendcinemaappify.payload.request.SignUpCinemaRequest;
-import com.cinema.backendcinemaappify.payload.request.SignupRequest;
+import com.cinema.backendcinemaappify.models.*;
+import com.cinema.backendcinemaappify.payload.request.*;
 import com.cinema.backendcinemaappify.payload.response.JwtResponse;
 import com.cinema.backendcinemaappify.payload.response.MessageResponse;
-import com.cinema.backendcinemaappify.repository.CinemaRepository;
-import com.cinema.backendcinemaappify.repository.RoleRepository;
-import com.cinema.backendcinemaappify.repository.UserRepository;
+import com.cinema.backendcinemaappify.repository.*;
 import com.cinema.backendcinemaappify.security.jwt.JwtUtils;
 import com.cinema.backendcinemaappify.security.services.CinemaDetailsImpl;
 import com.cinema.backendcinemaappify.security.services.UserDetailsImpl;
@@ -39,7 +33,11 @@ public class AuthController {
     AuthenticationManager authenticationManager; // Handles user authentication
 
     @Autowired
+    TheaterRepository theaterRepository;
+
+    @Autowired
     UserRepository userRepository; // Repository for user-related database operations
+
 
     @Autowired
     CinemaRepository cinemaRepository; // Repository for cinema
@@ -52,6 +50,8 @@ public class AuthController {
 
     @Autowired
     JwtUtils jwtUtils; // Utility for generating JWT tokens
+    @Autowired
+    private MovieRepository movieRepository;
 
     /**
      * Authenticate user and return a JWT token if successful.
@@ -225,4 +225,80 @@ public class AuthController {
         return ResponseEntity.ok(users);
     }
 
+
+//------------------------------------------------------------------------------------------------------------
+
+
+    @PostMapping("/createTheater")
+    public ResponseEntity<?> CreateTheater(@RequestBody RegisterTheaterRequest registerTheaterRequest) {
+
+        Optional<Cinema> cinema = cinemaRepository.findById(registerTheaterRequest.getCinemaId());
+
+        if (cinema.isPresent()) {
+            Theater newTheater = new Theater(
+                    registerTheaterRequest.getName(),
+                    registerTheaterRequest.getSchedule(),
+                    cinema.get().getId()
+            );
+            System.out.println(newTheater);
+            theaterRepository.save(newTheater);
+
+            return ResponseEntity.ok(new MessageResponse("Theater registered successfully!"));
+
+        }else {
+
+            return ResponseEntity.badRequest().body("Cinema ID is invalid");
+        }
+    }
+
+
+
+    @GetMapping("/getAllTheaters")
+    public ResponseEntity<?> GetAllTheaters() {
+        List<Theater> theaters = theaterRepository.findAll();
+        return ResponseEntity.ok(theaters);
+    }
+
+
+//-------------------------------------------------------------------------------
+
+    @PostMapping("/createMovie")
+    public ResponseEntity<?> CreateMovie(@RequestBody RegisterMovie registerMovieRequest) {
+        Optional<Cinema> cinema = cinemaRepository.findById(registerMovieRequest.getCinemaId());
+        Optional<Theater> theater = theaterRepository.findByName(registerMovieRequest.getTheaterName());
+
+        if (cinema.isPresent() && theater.isPresent()) {
+            Movie newMovie = new Movie(
+              registerMovieRequest.getName(),
+              registerMovieRequest.getSynopsis(),
+              registerMovieRequest.getDuration(),
+              registerMovieRequest.getPhoto(),
+              cinema.get().getId(),
+              theater.get().getCinemaId()
+            );
+
+            movieRepository.save(newMovie);
+            return ResponseEntity.ok("Movie created successfully");
+        }else {
+            return ResponseEntity.badRequest().body("Error: Couldn't register movie!");
+        }
+    }
+
+    @GetMapping("/getMovies")
+    public ResponseEntity<?> GetMovies() {
+        List<Movie> movies = movieRepository.findAll();
+        return ResponseEntity.ok(movies);
+    }
+
+    @GetMapping("/cinema/{cinemaId}/salas")
+    public ResponseEntity<?> GetTheatersByCinemaId(@PathVariable String cinemaId) {
+        List<Theater> theaters = theaterRepository.findByCinemaId(cinemaId);
+        System.out.println(theaters);
+        System.out.println(cinemaId);
+        if (!theaters.isEmpty()) {
+            return ResponseEntity.ok(theaters);
+        }else {
+            return ResponseEntity.status(404).body("Couldn't theaters with cinema ID: " + cinemaId);
+        }
+    }
 }
