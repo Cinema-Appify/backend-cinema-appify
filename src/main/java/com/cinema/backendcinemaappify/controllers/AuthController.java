@@ -170,6 +170,7 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
+    //----------------------------------------------------------------------------------------------
 
     @PostMapping("/signUpCinema")
     public ResponseEntity<?> registerCinema(@Valid @RequestBody SignUpCinemaRequest cinemaRequest) {
@@ -256,6 +257,7 @@ public class AuthController {
     @GetMapping("/getAllTheaters")
     public ResponseEntity<?> GetAllTheaters() {
         List<Theater> theaters = theaterRepository.findAll();
+        System.out.println(theaters);
         return ResponseEntity.ok(theaters);
     }
 
@@ -264,17 +266,22 @@ public class AuthController {
 
     @PostMapping("/createMovie")
     public ResponseEntity<?> CreateMovie(@RequestBody RegisterMovie registerMovieRequest) {
-        Optional<Cinema> cinema = cinemaRepository.findById(registerMovieRequest.getCinemaId());
-        Optional<Theater> theater = theaterRepository.findByName(registerMovieRequest.getTheaterName());
+        Optional<Cinema> cinemas = cinemaRepository.findById(registerMovieRequest.getCinemaId());
+        Optional<Theater> theaters = theaterRepository.findByName(registerMovieRequest.getTheaterName());
 
-        if (cinema.isPresent() && theater.isPresent()) {
+        System.out.println(theaters.get().getName());
+        System.out.println(registerMovieRequest.getTheaterName());
+
+        System.out.println(theaters.get().getId());
+
+        if (cinemas.isPresent() && theaters.isPresent()) {
             Movie newMovie = new Movie(
               registerMovieRequest.getName(),
               registerMovieRequest.getSynopsis(),
               registerMovieRequest.getDuration(),
               registerMovieRequest.getPhoto(),
-              cinema.get().getId(),
-              theater.get().getCinemaId()
+              cinemas.get().getId(),
+              theaters.get().getId()
             );
 
             movieRepository.save(newMovie);
@@ -300,5 +307,34 @@ public class AuthController {
         }else {
             return ResponseEntity.status(404).body("Couldn't theaters with cinema ID: " + cinemaId);
         }
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+
+    @DeleteMapping("/deleteTheater")
+    public ResponseEntity<?> DeleteTheater(@PathVariable String theaterName) {
+        Optional<Theater> theater = theaterRepository.findByName(theaterName);
+        if (theater.isPresent()) {
+            theaterRepository.delete(theater.get());
+
+            return ResponseEntity.ok("Theater deleted successfully");
+        }   else {
+            return ResponseEntity.badRequest().body("Error: Couldn't delete theater!");
+        }
+    }
+
+    @DeleteMapping("/deleteMovie")
+    public ResponseEntity<?> DeleteMovie(@PathVariable String movieName) {
+
+        Optional<Movie> movie = movieRepository.findByName(movieName);
+        System.out.println(movie);
+        if (movie.isPresent()) {
+            movieRepository.delete(movie.get());
+            return ResponseEntity.ok("Movie deleted successfully");
+        } else {
+            return ResponseEntity.badRequest().body("Error: Couldn't delete movie!");
+        }
+
     }
 }

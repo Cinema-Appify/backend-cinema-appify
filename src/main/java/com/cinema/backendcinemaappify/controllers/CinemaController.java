@@ -8,6 +8,7 @@ import com.cinema.backendcinemaappify.repository.CinemaRepository;
 import com.cinema.backendcinemaappify.repository.TheaterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,11 +19,12 @@ import java.util.List;
 public class CinemaController {
 
     @Autowired
-    CinemaRepository cinemaRepository;
+   private CinemaRepository cinemaRepository;
 
     @Autowired
-    TheaterRepository theaterRepository;
+    private TheaterRepository theaterRepository;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/getCinemas")
     public ResponseEntity<?> getAllCinema() {
         List<Cinema> cinemas = cinemaRepository.findAll();
