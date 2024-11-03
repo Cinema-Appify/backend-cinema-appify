@@ -1,9 +1,6 @@
 package com.cinema.backendcinemaappify.controllers;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.cinema.backendcinemaappify.models.*;
@@ -16,6 +13,7 @@ import com.cinema.backendcinemaappify.security.services.CinemaDetailsImpl;
 import com.cinema.backendcinemaappify.security.services.UserDetailsImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -253,12 +251,16 @@ public class AuthController {
     }
 
 
-
-    @GetMapping("/getAllTheaters")
-    public ResponseEntity<?> GetAllTheaters() {
-        List<Theater> theaters = theaterRepository.findAll();
+    @GetMapping("/cinema/{cinemaId}")
+    public ResponseEntity<?> GetAllTheatersByCinemaId(@PathVariable String cinemaId) {
+        List<Theater> theaters = theaterRepository.findByCinemaId(cinemaId);
         System.out.println(theaters);
-        return ResponseEntity.ok(theaters);
+        System.out.println(cinemaId);
+        if (!theaters.isEmpty()) {
+            return ResponseEntity.ok(theaters);
+        }else {
+            return ResponseEntity.status(404).body("Couldn't theaters with cinema ID: " + cinemaId);
+        }
     }
 
 
@@ -266,36 +268,91 @@ public class AuthController {
 
     @PostMapping("/createMovie")
     public ResponseEntity<?> CreateMovie(@RequestBody RegisterMovie registerMovieRequest) {
+        // Verificar si el usuario está autenticado
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error: No autorizado");
+        }
+
+        // Loguear el usuario autenticado
+        System.out.println("Usuario autenticado: " + authentication.getName());
+
+        // Loguear la solicitud recibida
+        System.out.println("Solicitud para crear película: " + registerMovieRequest);
+
+        // Buscar el cine y el teatro
         Optional<Cinema> cinemas = cinemaRepository.findById(registerMovieRequest.getCinemaId());
         Optional<Theater> theaters = theaterRepository.findByName(registerMovieRequest.getTheaterName());
 
-        System.out.println(theaters.get().getName());
-        System.out.println(registerMovieRequest.getTheaterName());
+        // Loguear resultados de las búsquedas
+        if (cinemas.isPresent()) {
+            System.out.println("Cine encontrado: " + cinemas.get().getName());
+        } else {
+            System.out.println("Cine no encontrado con ID: " + registerMovieRequest.getCinemaId());
+        }
 
-        System.out.println(theaters.get().getId());
+        if (theaters.isPresent()) {
+            System.out.println("Teatro encontrado: " + theaters.get().getName());
+        } else {
+            System.out.println("Teatro no encontrado con nombre: " + registerMovieRequest.getTheaterName());
+        }
 
+        // Comprobar si se encontraron cine y teatro
         if (cinemas.isPresent() && theaters.isPresent()) {
             Movie newMovie = new Movie(
-              registerMovieRequest.getName(),
-              registerMovieRequest.getSynopsis(),
-              registerMovieRequest.getDuration(),
-              registerMovieRequest.getPhoto(),
-              cinemas.get().getId(),
-              theaters.get().getId()
+                    registerMovieRequest.getName(),
+                    registerMovieRequest.getSynopsis(),
+                    registerMovieRequest.getDuration(),
+                    registerMovieRequest.getPhoto(),
+                    cinemas.get().getId(),
+                    theaters.get().getId()
             );
 
+            // Loguear la película que se va a guardar
+            System.out.println("Guardando nueva película: " + newMovie);
             movieRepository.save(newMovie);
-            return ResponseEntity.ok("Movie created successfully");
-        }else {
-            return ResponseEntity.badRequest().body("Error: Couldn't register movie!");
+            return ResponseEntity.ok(Map.of("message", "Movie created successfully!"));
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("error", "Couldn't create movie!"));
         }
     }
 
-    @GetMapping("/getMovies")
-    public ResponseEntity<?> GetMovies() {
-        List<Movie> movies = movieRepository.findAll();
-        return ResponseEntity.ok(movies);
+
+
+
+    @GetMapping("/cinema/{cinemaId}/movies")
+    public ResponseEntity<?> GetMovies(@PathVariable String cinemaId) {
+        List<Movie> movies = movieRepository.findByCinemaId(cinemaId);
+
+        if (!movies.isEmpty()) {
+            return ResponseEntity.ok(movies);
+        } else {
+            return ResponseEntity.status(404).body("Couldn't find movies with cinema ID: " + cinemaId);
+        }
     }
+
+
+    @GetMapping("/movie/getAll")
+    public ResponseEntity<?> GetAllMovies() {
+        System.out.println("Ejecutando GetAllMovies...");
+
+        List<Movie> movies = movieRepository.findAll();
+        System.out.println("Películas encontradas: " + movies.size());
+
+        // Imprimir los detalles de cada película (opcional)
+        for (Movie movie : movies) {
+            System.out.println("Detalles de la película: " + movie);
+        }
+
+        if (!movies.isEmpty()) {
+            System.out.println("Devolviendo películas con éxito.");
+            return ResponseEntity.ok(movies);
+        } else {
+            System.out.println("No se encontraron películas.");
+            return ResponseEntity.status(404).body("Couldn't find theaters with cinema ID: ");
+        }
+    }
+
 
     @GetMapping("/cinema/{cinemaId}/salas")
     public ResponseEntity<?> GetTheatersByCinemaId(@PathVariable String cinemaId) {
@@ -305,7 +362,7 @@ public class AuthController {
         if (!theaters.isEmpty()) {
             return ResponseEntity.ok(theaters);
         }else {
-            return ResponseEntity.status(404).body("Couldn't theaters with cinema ID: " + cinemaId);
+            return ResponseEntity.status(404).body("Couldn't find theaters with cinema ID: " + cinemaId);
         }
     }
 
