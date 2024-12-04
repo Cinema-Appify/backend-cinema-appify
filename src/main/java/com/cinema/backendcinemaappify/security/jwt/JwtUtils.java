@@ -3,6 +3,7 @@ package com.cinema.backendcinemaappify.security.jwt;
 import java.security.Key; // Import Key for cryptographic operations
 import java.util.Date; // Import Date for handling date and time
 
+import com.cinema.backendcinemaappify.security.services.CinemaDetailsImpl;
 import com.cinema.backendcinemaappify.security.services.UserDetailsImpl;
 import org.slf4j.Logger; // Import Logger for logging errors and information
 import org.slf4j.LoggerFactory; // Import LoggerFactory for creating Logger instances
@@ -34,17 +35,32 @@ public class JwtUtils {
      * @return The generated JWT token as a string.
      */
     public String generateJwtToken(Authentication authentication) {
-        // Get the user details from the authentication object
-        UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+        String username;
 
-        // Build and return the JWT token
+        Object principal = authentication.getPrincipal();
+
+        // Check for UserDetailsImpl first
+        if (principal instanceof UserDetailsImpl) {
+            UserDetailsImpl userPrincipal = (UserDetailsImpl) principal;
+            username = userPrincipal.getUsername();
+        }
+        // Then check for CinemaDetailsImpl
+        else if (principal instanceof CinemaDetailsImpl) {
+            CinemaDetailsImpl cinemaPrincipal = (CinemaDetailsImpl) principal;
+            username = cinemaPrincipal.getUsername();
+        }
+        // Handle the case where neither type is matched
+        else {
+            logger.error("Unsupported principal type: {}", principal.getClass().getName());
+            throw new IllegalArgumentException("Unsupported principal type");
+        }
+
         return Jwts.builder()
-                .setSubject((userPrincipal.getUsername())) // Set the subject (username)
-                .setIssuedAt(new Date()) // Set the issue date
-                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs)) // Set the expiration date
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key(), SignatureAlgorithm.HS256)
-                // Sign the token using the secret key and algorithm
-                .compact(); // Compact the JWT into a string
+                .compact();
     }
 
     /**

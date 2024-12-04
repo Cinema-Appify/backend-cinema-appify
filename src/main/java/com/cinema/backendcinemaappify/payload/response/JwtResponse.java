@@ -6,32 +6,51 @@ public class JwtResponse {
     private String token;
     private String type = "Bearer";
     private String id;
-    private String username;
+    private String name;
+    private String firstName;
+    private String lastName;
     private String email;
+    private String state;
     private List<String> roles;
 
-    public JwtResponse(String accessToken, String id, String username, String email, List<String> roles) {
-        this.token = accessToken;
+    public JwtResponse() {
+    }
+
+    public JwtResponse(String token, String id, String name, String firstName, String lastName, String email, List<String> roles) {
+        this.token = token;
+        this.type = type;
         this.id = id;
-        this.username = username;
+        this.name = name;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.email = email;
         this.roles = roles;
     }
 
-    public String getAccessToken() {
+    public JwtResponse(String token, String id, String name, String email, String state, List<String> roles) {
+        this.token = token;
+        this.type = type;
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.state = state;
+        this.roles = roles;
+    }
+
+    public String getToken() {
         return token;
     }
 
-    public void setAccessToken(String accessToken) {
-        this.token = accessToken;
+    public void setToken(String token) {
+        this.token = token;
     }
 
-    public String getTokenType() {
+    public String getType() {
         return type;
     }
 
-    public void setTokenType(String tokenType) {
-        this.type = tokenType;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getId() {
@@ -42,6 +61,30 @@ public class JwtResponse {
         this.id = id;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
     public String getEmail() {
         return email;
     }
@@ -50,15 +93,19 @@ public class JwtResponse {
         this.email = email;
     }
 
-    public String getUsername() {
-        return username;
+    public String getState() {
+        return state;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setState(String state) {
+        this.state = state;
     }
 
     public List<String> getRoles() {
         return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 }

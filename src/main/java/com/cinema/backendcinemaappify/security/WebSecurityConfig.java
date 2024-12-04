@@ -87,30 +87,18 @@ public class WebSecurityConfig {
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // Configure CSRF protection, exception handling, session management, and authorization
-        http.csrf(AbstractHttpConfigurer::disable) // Disable CSRF protection
+        http
+                .csrf(csrf -> csrf.disable()) // Desactiva CSRF
                 .exceptionHandling(exception ->
-                        exception.authenticationEntryPoint(unauthorizedHandler))
-                // Set unauthorized handler
+                        exception.authenticationEntryPoint(unauthorizedHandler)) // Configura el manejo de excepciones
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // Set session policy to stateless
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Define la política de sesión como STATELESS
                 .authorizeHttpRequests(auth -> auth
-                        // Configure authorization for HTTP requests
-                        .requestMatchers("/api/auth/**").permitAll()
-                        // Allow public access to auth endpoints
-                        .requestMatchers("/api/test/**").permitAll()
-                        // Allow public access to test endpoints
-                        .anyRequest().authenticated());
-        // Require authentication for any other request
+                        .requestMatchers("/", "/error", "/api/auth/**", "/api/test/**", "/api/chatbot/**").permitAll() // Permite acceso público a estas rutas
+                        .anyRequest().authenticated()) // Requiere autenticación para todas las demás rutas
+                .authenticationProvider(authenticationProvider()) // Establece el proveedor de autenticación
+                .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class); // Agrega el filtro JWT
 
-        http.authenticationProvider(authenticationProvider()); // Set the authentication provider
-
-        // Add the JWT token filter before the username/password authentication filter
-        http.addFilterBefore(authenticationJwtTokenFilter(),
-                UsernamePasswordAuthenticationFilter.class);
-
-        return http.build(); // Build and return the security filter chain
+        return http.build();
     }
 }
-
