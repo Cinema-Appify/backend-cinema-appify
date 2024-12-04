@@ -94,7 +94,7 @@ public class WebSecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Define la política de sesión como STATELESS
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/error", "/api/auth/**", "/api/test/**").permitAll() // Permite acceso público a estas rutas
+                        .requestMatchers("/", "/error", "/api/auth/**", "/api/test/**", "/api/chatbot/**").permitAll() // Permite acceso público a estas rutas
                         .anyRequest().authenticated()) // Requiere autenticación para todas las demás rutas
                 .authenticationProvider(authenticationProvider()) // Establece el proveedor de autenticación
                 .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class); // Agrega el filtro JWT

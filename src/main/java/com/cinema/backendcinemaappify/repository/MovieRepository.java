@@ -11,4 +11,6 @@ public interface MovieRepository extends MongoRepository<Movie, String> {
     Optional<Movie> findByName(String name);
 
     List<Movie> findByCinemaId(String cinemaId);
+
+    List<Movie> findByTheaterId(String theaterId);
 }
